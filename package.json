@@ -1,5 +1,6 @@
 {
   "name": "magnet-getter",
+  "version": "0.0.0-development",
   "description": "An API to get magnet links using Puppeteer.",
   "main": "src/index.js",
   "author": "Sander Schekman",
