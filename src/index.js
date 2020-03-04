@@ -9,7 +9,11 @@ const agent = {
   SELECTORS: {
     RESULTS: ".table-list tbody tr",
     RESULT_NAME: ".name",
-    DETAIL_PAGE_URL: ".name a:nth-child(2)"
+    DETAIL_PAGE_URL: ".name a:nth-child(2)",
+    SEEDS: ".seeds",
+    LEECHES: ".leeches",
+    SIZE: ".size",
+    DATE: ".coll-date"
   },
   categories: {
     movies: "Movies",
@@ -49,6 +53,10 @@ async function makeTheQuery() {
       agent.SELECTORS.DETAIL_PAGE_URL,
       "href"
     );
+    const seeds = await getPropertyValue(result, agent.SELECTORS.SEEDS);
+    const leeches = await getPropertyValue(result, agent.SELECTORS.LEECHES);
+    const size = await getPropertyValue(result, agent.SELECTORS.SIZE);
+    const date = await getPropertyValue(result, agent.SELECTORS.DATE);
     // const poster = await PuppeteerUtility.getPropertyValue(
     //   result,
     //   constants.RESULTS_QUERY_SELECTORS.RESULT_POSTER_URL,
@@ -59,7 +67,7 @@ async function makeTheQuery() {
     //   constants.RESULTS_QUERY_SELECTORS.RESULT_YEAR
     // );
 
-    console.log({ name, url });
+    console.log({ name, url, seeds, leeches, size, date });
 
     response.push({
       name
