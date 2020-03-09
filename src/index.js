@@ -6,6 +6,7 @@ const agent = {
     QUERY_PLACEHOLDER: "%query%",
     CATEGORY_PLACEHOLDER: "%category%"
   },
+  DATE_REGEX: /(th|\.|\')/gm,
   SELECTORS: {
     QUERY: {
       RESULTS: ".table-list tbody tr",
@@ -39,11 +40,15 @@ async function getPropertyValue(element, selector, property = "innerText") {
 }
 
 async function makeTheQuery() {
-  const encodedQuery = encodeURIComponent("Better Call Saul S05E03");
+  const encodedQuery = encodeURIComponent("Trollhunter (2010)");
+  // const encodedQuery = encodeURIComponent("Better Call Saul S05E03");
   //   const encodedQuery = encodeURIComponent("1917 (2019)");
   let url = agent.QUERIES.URL;
   url = url.replace(agent.QUERIES.QUERY_PLACEHOLDER, encodedQuery);
-  url = url.replace(agent.QUERIES.CATEGORY_PLACEHOLDER, agent.categories.tv);
+  url = url.replace(
+    agent.QUERIES.CATEGORY_PLACEHOLDER,
+    agent.categories.movies
+  );
 
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
@@ -80,15 +85,33 @@ async function makeTheQuery() {
     //   constants.RESULTS_QUERY_SELECTORS.QUERY.RESULT_YEAR
     // );
 
-    console.log({ name, url, seeds, leeches, size, date });
+    console.log({
+      name,
+      url,
+      seeds,
+      leeches,
+      size,
+      date: formatDate(agent, date)
+    });
 
-    queryResults.push({ name, url, seeds, leeches, size, date });
+    queryResults.push({
+      name,
+      url,
+      seeds,
+      leeches,
+      size,
+      date: formatDate(agent, date)
+    });
   }
 
   await browser.close();
 
   getMagnetLink(1);
 }
+
+const formatDate = (agent, dateString) => {
+  return new Date(dateString.replace(agent.DATE_REGEX, ""));
+};
 
 const getMagnetLink = async index => {
   const magnet = queryResults[index];
@@ -108,5 +131,10 @@ const getMagnetLink = async index => {
 
   // const magnetLink = await page.$$(agent.SELECTORS.DETAIL.RESULTS);
 };
+
+// const sortBySeeders = () => {
+//   const data = queryResults;
+//   results.filter();
+// };
 
 makeTheQuery();
