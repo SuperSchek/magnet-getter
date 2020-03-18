@@ -24,8 +24,9 @@ const constants = {
     AIRDATE: ".airdate"
   },
   DEFAULT_OPTIONS: {
-    port: 5000,
-    routesPrefix: "/api/imdb",
+    port: 5001,
+    databaseFile: "./db/db.json",
+    routesPrefix: "/api/magnet-getter",
     routes: {
       queryImdb: "/search",
       getSeasons: "/tv/seasons",
