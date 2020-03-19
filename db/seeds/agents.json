@@ -12,18 +12,45 @@
       }
     },
     "dateRegex": "/(th|.|')/gm",
-    "selectors": {
-      "query": {
-        "results": ".table-list tbody tr",
-        "resultName": ".name",
-        "detailPageUrl": ".name a:nth-child(2)",
-        "seeds": ".seeds",
-        "leeches": ".leeches",
-        "size": ".size",
-        "date": ".coll-date"
+    "querySelectors": {
+      "queryPageSelectors": {
+        "resultsSelector": ".table-list tbody tr",
+        "resultNameSelector": ".name",
+        "detailPageUrlSelector": ".name a:nth-child(2)",
+        "seedsSelector": ".seeds",
+        "leechesSelector": ".leeches",
+        "sizeSelector": ".size",
+        "dateSelector": ".coll-date"
       },
-      "detail": {
-        "magnetLinks": ".torrent-detail-page a"
+      "detailPageSelectors": {
+        "magnetLinkSelector": ".torrent-detail-page a"
+      }
+    }
+  },
+  {
+    "name": "limetorrents.cc",
+    "slug": "limetorrents",
+    "queries": {
+      "url": "https://www.limetorrents.info/search/%category%/%query%/",
+      "queryPlaceholder": "%query%",
+      "categoryPlaceholder": "%category%",
+      "categories": {
+        "movies": "movies",
+        "tvShows": "tv"
+      }
+    },
+    "querySelectors": {
+      "queryPageSelectors": {
+        "resultsSelector": "table.table2 tr:not(:first-child)",
+        "resultNameSelector": ".tt-name",
+        "detailPageUrlSelector": ".tt-name a:nth-child(2)",
+        "seedsSelector": ".tdseed",
+        "leechesSelector": ".tdleech",
+        "sizeSelector": ".tdnormal:nth-child(2)",
+        "dateSelector": ".tdnormal:nth-child(1)"
+      },
+      "detailPageSelectors": {
+        "magnetLinkSelector": ".torrentinfo > div:nth-of-type(4) p a"
       }
     }
   }

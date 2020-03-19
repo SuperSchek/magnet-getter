@@ -5,6 +5,7 @@ class Crawler {
   constructor(options, database) {
     this._options = options;
     this._db = database;
+    this._browser = null;
   }
 
   /**
@@ -46,53 +47,6 @@ class Crawler {
     //   const results = await page.$$(agent.SELECTORS.QUERY.RESULTS);
     //   const response = [];
 
-    //   for (let i = 0; i < results.length; i++) {
-    //     const result = results[i];
-    //     const name = await getPropertyValue(
-    //       result,
-    //       agent.SELECTORS.QUERY.RESULT_NAME
-    //     );
-    //     const url = await getPropertyValue(
-    //       result,
-    //       agent.SELECTORS.QUERY.DETAIL_PAGE_URL,
-    //       "href"
-    //     );
-    //     const seeds = await getPropertyValue(result, agent.SELECTORS.QUERY.SEEDS);
-    //     const leeches = await getPropertyValue(
-    //       result,
-    //       agent.SELECTORS.QUERY.LEECHES
-    //     );
-    //     const size = await getPropertyValue(result, agent.SELECTORS.QUERY.SIZE);
-    //     const date = await getPropertyValue(result, agent.SELECTORS.QUERY.DATE);
-    //     // const poster = await PuppeteerUtility.getPropertyValue(
-    //     //   result,
-    //     //   constants.RESULTS_QUERY_SELECTORS.QUERY.RESULT_POSTER_URL,
-    //     //   "src"
-    //     // );
-    //     // const year = await PuppeteerUtility.getPropertyValue(
-    //     //   result,
-    //     //   constants.RESULTS_QUERY_SELECTORS.QUERY.RESULT_YEAR
-    //     // );
-
-    //     console.log({
-    //       name,
-    //       url,
-    //       seeds,
-    //       leeches,
-    //       size,
-    //       date: formatDate(agent, date)
-    //     });
-
-    //     queryResults.push({
-    //       name,
-    //       url,
-    //       seeds,
-    //       leeches,
-    //       size,
-    //       date: formatDate(agent, date)
-    //     });
-    //   }
-
     //   await browser.close();
 
     // getMagnetLink(1);
@@ -105,29 +59,78 @@ class Crawler {
    */
   getMagnetLink(url, querySelector) {}
 
-  async _queryAgent(rawQuery, type, agent) {
-    // const browser = await puppeteer.launch();
-    // const page = await browser.newPage();
-    const url = this._buildQueryUrl(rawQuery, type, agent);
+  async _queryAgent(query, type, agent) {
+    const url = this._buildQueryUrl(query, type, agent);
 
-    const {
-      selectors: {
-        query: { results }
-      }
-    } = agent;
-    console.log(results);
+    console.log(url);
 
-    // this._getResults(÷/)
+    const results = await this._getResults(url, agent);
+    const parsedResults = await this._parseResults(results, agent);
 
-    // await page.goto(url);
+    console.log(parsedResults);
 
-    // const results = await page.$$(agent.selectors.query.results);
-
-    // await browser.close();
-
-    // console.log(results);
-
+    this._browser.close();
     // return results;
+  }
+
+  async _getResults(
+    url,
+    {
+      querySelectors: {
+        queryPageSelectors: { resultsSelector, resultNameSelector }
+      }
+    }
+  ) {
+    this._browser = await puppeteer.launch();
+    const page = await this._browser.newPage();
+    await page.goto(url);
+    const results = await page.$$(resultsSelector);
+
+    return results;
+  }
+
+  async _parseResults(results, { querySelectors: { queryPageSelectors } }) {
+    const parsedResults = [];
+
+    for (let i = 0; i < results.length; i++) {
+      const result = results[i];
+      const name = await this._getPropertyValue(
+        result,
+        queryPageSelectors.resultNameSelector
+      );
+      const url = await this._getPropertyValue(
+        result,
+        queryPageSelectors.detailPageUrlSelector,
+        "href"
+      );
+      const seeds = await this._getPropertyValue(
+        result,
+        queryPageSelectors.seedsSelector
+      );
+      const leeches = await this._getPropertyValue(
+        result,
+        queryPageSelectors.leechesSelector
+      );
+      const size = await this._getPropertyValue(
+        result,
+        queryPageSelectors.sizeSelector
+      );
+      const date = await this._getPropertyValue(
+        result,
+        queryPageSelectors.dateSelector
+      );
+
+      parsedResults.push({
+        name,
+        url,
+        seeds,
+        leeches,
+        size,
+        date
+      });
+    }
+
+    return parsedResults;
   }
 
   _buildQueryUrl(query, type, agent) {
@@ -144,6 +147,16 @@ class Crawler {
 
   _filterResults(type) {
     const rules = _merge(this._options.rules.common, this._options.rules[type]);
+  }
+
+  async _getPropertyValue(element, selector, property = "innerText") {
+    try {
+      return await (
+        await (await element.$(selector)).getProperty(property)
+      ).jsonValue();
+    } catch {
+      throw new Error(`Can't find anything with selector: ${selector}`);
+    }
   }
 }
 
