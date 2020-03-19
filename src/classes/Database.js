@@ -37,7 +37,7 @@ class Database {
     const agents = this.db.get("agents").value();
 
     if (agents === undefined) {
-      this.loadSeeds();
+      this._loadSeeds();
     }
 
     // Check if DB is present
@@ -45,7 +45,10 @@ class Database {
     // If not load seeds
   }
 
-  loadSeeds() {
+  /**
+   * Popolates a new DB with seed data
+   */
+  _loadSeeds() {
     this.db.defaults({ agents: [] }).write();
 
     const defaultAgents = require("../../db/seeds/agents.json");

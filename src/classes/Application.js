@@ -33,7 +33,13 @@ class Application {
   }
 
   set crawler(payload) {
-    this._crawler = payload;
+    if (payload instanceof Crawler) {
+      this._crawler = payload;
+    } else {
+      throw new TypeError(
+        `Expected payload to be instance of Crawler. Got ${payload.constructor.name} instead.`
+      );
+    }
   }
 
   set database(payload) {
