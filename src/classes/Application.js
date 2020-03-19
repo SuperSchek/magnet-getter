@@ -10,16 +10,10 @@ const Database = require("./Database");
 class Application {
   constructor() {
     this._options = null;
-    this._db = null;
+    this._database = null;
     this._crawler = null;
   }
 
-  /**
-   * Returns the options object
-   * @public
-   *
-   * @returns {object}
-   */
   get options() {
     return this._options;
   }
@@ -28,13 +22,10 @@ class Application {
     return this._crawler;
   }
 
-  get db() {
-    return this._db;
+  get database() {
+    return this._database;
   }
 
-  /**
-   * Checks whether the payload contains an object and if so
-   */
   set options(payload) {
     if (payload instanceof Object) {
       this._options = this._mergeOptions(payload);
@@ -45,8 +36,14 @@ class Application {
     this._crawler = payload;
   }
 
-  set db(payload) {
-    this._db = payload;
+  set database(payload) {
+    if (payload instanceof Database) {
+      this._database = payload;
+    } else {
+      throw new TypeError(
+        `Expected payload to be instance of Database. Got ${payload.constructor.name} instead.`
+      );
+    }
   }
 
   _mergeOptions(options) {
@@ -60,10 +57,8 @@ class Application {
    */
   init(options) {
     this.options = options;
-    this.db = new Database(this.options);
-    this.crawler = new Crawler(this.options, this.db);
-
-    console.log("Starting app!");
+    this.database = new Database(this.options);
+    this.crawler = new Crawler(this.options, this.database.db);
   }
 
   /**
