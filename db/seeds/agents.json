@@ -1,27 +1,30 @@
-{
-  "name": "1337x.to",
-  "queries": {
-    "url": "https://1337x.to/category-search/%query%/%category%/1/",
-    "queryPlaceholder": "%query%",
-    "categoryPlaceholder": "%category%",
-    "categories": {
-      "movies": "Movies",
-      "tv": "TV"
-    }
-  },
-  "dateRegex": "/(th|.|')/gm",
-  "selector": {
-    "query": {
-      "results": ".table-list tbody tr",
-      "resultName": ".name",
-      "detailPageUrl": ".name a:nth-child(2)",
-      "seeds": ".seeds",
-      "leeches": ".leeches",
-      "size": ".size",
-      "date": ".coll-date"
+[
+  {
+    "name": "1337x.to",
+    "slug": "1337x",
+    "queries": {
+      "url": "https://1337x.to/category-search/%query%/%category%/1/",
+      "queryPlaceholder": "%query%",
+      "categoryPlaceholder": "%category%",
+      "categories": {
+        "movies": "Movies",
+        "tvShows": "TV"
+      }
     },
-    "detail": {
-      "magnetLinks": ".torrent-detail-page a"
+    "dateRegex": "/(th|.|')/gm",
+    "selectors": {
+      "query": {
+        "results": ".table-list tbody tr",
+        "resultName": ".name",
+        "detailPageUrl": ".name a:nth-child(2)",
+        "seeds": ".seeds",
+        "leeches": ".leeches",
+        "size": ".size",
+        "date": ".coll-date"
+      },
+      "detail": {
+        "magnetLinks": ".torrent-detail-page a"
+      }
     }
   }
-}
+]

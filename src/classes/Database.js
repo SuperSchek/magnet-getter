@@ -1,4 +1,3 @@
-const constants = require("../constants");
 const low = require("lowdb");
 const FileSync = require("lowdb/adapters/FileSync");
 
@@ -7,6 +6,8 @@ class Database {
     this._options = options;
     this._adapter = null;
     this._db = null;
+
+    this._init();
   }
 
   get adapter() {
@@ -29,20 +30,32 @@ class Database {
     this._db = payload;
   }
 
-  init() {
+  _init() {
     this.adapter = new FileSync(this.options.databaseFile);
-    console.log(this.adapter);
-
     this.db = low(this.adapter);
 
-    this.loadSeeds();
+    const agents = this.db.get("agents").value();
+
+    if (agents === undefined) {
+      this.loadSeeds();
+    }
+
     // Check if DB is present
-    // If so, nothing to init. Just listen
+    // If so, nothing to _init. Just listen
     // If not load seeds
   }
 
   loadSeeds() {
     this.db.defaults({ agents: [] }).write();
+
+    const defaultAgents = require("../../db/seeds/agents.json");
+
+    defaultAgents.forEach(agent => {
+      this.db
+        .get("agents")
+        .push(agent)
+        .write();
+    });
   }
 }
 

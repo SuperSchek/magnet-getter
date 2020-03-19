@@ -1,6 +1,9 @@
 const Application = require("./classes/Application");
 
-const app = new Application().start({ port: 3001 });
+const app = new Application();
+
+app.init({ port: 3001 });
+app.query("test", "movies");
 
 module.exports = Application;
 

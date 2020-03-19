@@ -3,11 +3,15 @@
 // const app = express();
 const _merge = require("lodash/merge");
 const constants = require("../constants");
+const Crawler = require("./Crawler");
+const Database = require("./Database");
 // const Router = require("../classes/Router");
 
 class Application {
   constructor() {
     this._options = null;
+    this._db = null;
+    this._crawler = null;
   }
 
   /**
@@ -20,6 +24,14 @@ class Application {
     return this._options;
   }
 
+  get crawler() {
+    return this._crawler;
+  }
+
+  get db() {
+    return this._db;
+  }
+
   /**
    * Checks whether the payload contains an object and if so
    */
@@ -29,8 +41,16 @@ class Application {
     }
   }
 
+  set crawler(payload) {
+    this._crawler = payload;
+  }
+
+  set db(payload) {
+    this._db = payload;
+  }
+
   _mergeOptions(options) {
-    return _merge(constants.DEFAULT_OPTIONS, options);
+    return _merge(constants.defaultOptions, options);
   }
 
   /**
@@ -40,10 +60,22 @@ class Application {
    */
   init(options) {
     this.options = options;
-    console.log(this.options);
+    this.db = new Database(this.options);
+    this.crawler = new Crawler(this.options, this.db);
 
     console.log("Starting app!");
   }
+
+  /**
+   *
+   * @param {string} query
+   * @param {string} [type='tvShows'] - Either 'tvShows' or 'movies'
+   * @param {string} agentSlug
+   */
+  query(query, type = "tvShows", agentSlug = null) {
+    this.crawler.getQueryResults(query, type, agentSlug);
+  }
+
   // // /**
   // //  * Serves up an instance of the API
   // //  * @public
