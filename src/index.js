@@ -3,7 +3,10 @@ const Application = require("./classes/Application");
 const app = new Application();
 
 app.init({ port: 3001 });
-app.query("Yesterday (2019)", "movies", "limetorrents");
+// app.query("Yesterday (2019)", "movies", "limetorrents");
+app.query("The Man Who Killed Don Quixote (2018)", "movies", "limetorrents");
+// app.query("The Man Who Killed Don Quixote", "movies", "1337x");
+// app.query("Westworld S03E02", "tvShows", "1337x");
 // app.query("Better Call Saul S05E05", "tvShows", "1337x");
 
 module.exports = Application;

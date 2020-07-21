@@ -1,5 +1,6 @@
 const puppeteer = require("puppeteer");
 const _merge = require("lodash/merge");
+const { parse } = require("yargs");
 
 class Crawler {
   constructor(options, database) {
@@ -15,41 +16,15 @@ class Crawler {
    * @param {string} agentSlug
    */
   getQueryResults(query, type, agentSlug) {
-    const results = [];
-
     if (agentSlug !== null) {
-      const agent = this._db
-        .get("agents")
-        .find({ slug: agentSlug })
-        .value();
+      const agent = this._db.get("agents").find({ slug: agentSlug }).value();
       this._queryAgent(query, type, agent);
     } else {
       const agents = this._db.get("agents").value();
-      agents.forEach(agent => {
+      agents.forEach((agent) => {
         this._queryAgent(query, type, agent);
       });
     }
-
-    // const encodedQuery = encodeURIComponent(query);
-    //   // const encodedQuery = encodeURIComponent("Better Call Saul S05E03");
-    //   //   const encodedQuery = encodeURIComponent("1917 (2019)");
-    //   let url = agent.QUERIES.URL;
-    //   url = url.replace(agent.QUERIES.QUERY_PLACEHOLDER, encodedQuery);
-    //   url = url.replace(
-    //     agent.QUERIES.CATEGORY_PLACEHOLDER,
-    //     agent.categories.movies
-    //   );
-
-    //   const browser = await puppeteer.launch();
-    //   const page = await browser.newPage();
-    //   await page.goto(url);
-
-    //   const results = await page.$$(agent.SELECTORS.QUERY.RESULTS);
-    //   const response = [];
-
-    //   await browser.close();
-
-    // getMagnetLink(1);
   }
 
   /**
@@ -59,13 +34,40 @@ class Crawler {
    */
   getMagnetLink(url, querySelector) {}
 
+  /**
+   * Mutates the passed array to a sorted version by key
+   *
+   * @param {array} results - Array of objects
+   * @param {string} key
+   */
+  _sortByKey(results, key, order = "asc") {
+    if (results[0][key]) {
+      if (order === "asc") {
+        results.sort((a, b) => (a[key] > b[key] ? 1 : -1));
+      } else if (order === "desc") {
+        results.sort((a, b) => (a[key] < b[key] ? 1 : -1));
+      } else {
+        throw new Error(
+          `sortByKey: Expected 'order' to be 'asc' or 'desc'. Got: '${order}'`
+        );
+      }
+    } else {
+      throw new Error(
+        `sortByKey: Passed key '${order}' does not seem to be present.`
+      );
+    }
+  }
+
+  _filterResults(type) {
+    const rules = _merge(this._options.rules.common, this._options.rules[type]);
+  }
+
   async _queryAgent(query, type, agent) {
     const url = this._buildQueryUrl(query, type, agent);
-
-    console.log(url);
-
     const results = await this._getResults(url, agent);
     const parsedResults = await this._parseResults(results, agent);
+
+    this._sortByKey(parsedResults, "size");
 
     console.log(parsedResults);
 
@@ -77,8 +79,8 @@ class Crawler {
     url,
     {
       querySelectors: {
-        queryPageSelectors: { resultsSelector, resultNameSelector }
-      }
+        queryPageSelectors: { resultsSelector, resultNameSelector },
+      },
     }
   ) {
     this._browser = await puppeteer.launch();
@@ -125,8 +127,8 @@ class Crawler {
         url,
         seeds,
         leeches,
-        size,
-        date
+        size: this._parseFileSize(size),
+        date,
       });
     }
 
@@ -145,8 +147,19 @@ class Crawler {
     return url;
   }
 
-  _filterResults(type) {
-    const rules = _merge(this._options.rules.common, this._options.rules[type]);
+  /**
+   *
+   * @param {string} fileSize
+   */
+  _parseFileSize(fileSize) {
+    const sizeString = fileSize.toLowerCase();
+    if (sizeString.indexOf("mb") !== -1) {
+      const megaBytes = sizeString.replace("mb", "").replace(",", "");
+      return megaBytes * 1;
+    } else if (sizeString.indexOf("gb") !== -1) {
+      const gigaBytes = sizeString.replace("gb", "").replace(",", "");
+      return gigaBytes * 1000;
+    }
   }
 
   async _getPropertyValue(element, selector, property = "innerText") {
