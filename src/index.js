@@ -1,112 +1,42 @@
-const puppeteer = require("puppeteer");
+const Application = require("./classes/Application");
 
-const agent = {
-  QUERIES: {
-    URL: "https://1337x.to/category-search/%query%/%category%/1/",
-    QUERY_PLACEHOLDER: "%query%",
-    CATEGORY_PLACEHOLDER: "%category%"
-  },
-  SELECTORS: {
-    QUERY: {
-      RESULTS: ".table-list tbody tr",
-      RESULT_NAME: ".name",
-      DETAIL_PAGE_URL: ".name a:nth-child(2)",
-      SEEDS: ".seeds",
-      LEECHES: ".leeches",
-      SIZE: ".size",
-      DATE: ".coll-date"
-    },
-    DETAIL: {
-      MAGNET_LINK: ".torrent-detail-page a"
-    }
-  },
-  categories: {
-    movies: "Movies",
-    tv: "TV"
-  }
-};
+const app = new Application();
 
-const queryResults = [];
+app.init({ port: 3001 });
+// app.query("Yesterday (2019)", "movies", "limetorrents");
+app.query("The Man Who Killed Don Quixote (2018)", "movies", "limetorrents");
+// app.query("The Man Who Killed Don Quixote", "movies", "1337x");
+// app.query("Westworld S03E02", "tvShows", "1337x");
+// app.query("Better Call Saul S05E05", "tvShows", "1337x");
 
-async function getPropertyValue(element, selector, property = "innerText") {
-  try {
-    return await (
-      await (await element.$(selector)).getProperty(property)
-    ).jsonValue();
-  } catch {
-    throw new Error(`Can't find anything with selector: ${selector}`);
-  }
-}
+module.exports = Application;
 
-async function makeTheQuery() {
-  const encodedQuery = encodeURIComponent("Better Call Saul S05E03");
-  //   const encodedQuery = encodeURIComponent("1917 (2019)");
-  let url = agent.QUERIES.URL;
-  url = url.replace(agent.QUERIES.QUERY_PLACEHOLDER, encodedQuery);
-  url = url.replace(agent.QUERIES.CATEGORY_PLACEHOLDER, agent.categories.tv);
+// const formatDate = (agent, dateString) => {
+//   return new Date(dateString.replace(agent.DATE_REGEX, ""));
+// };
 
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-  await page.goto(url);
+// const getMagnetLink = async index => {
+//   const magnet = queryResults[index];
 
-  const results = await page.$$(agent.SELECTORS.QUERY.RESULTS);
-  const response = [];
+//   console.log("getting magnet link for " + magnet.name);
 
-  for (let i = 0; i < results.length; i++) {
-    const result = results[i];
-    const name = await getPropertyValue(
-      result,
-      agent.SELECTORS.QUERY.RESULT_NAME
-    );
-    const url = await getPropertyValue(
-      result,
-      agent.SELECTORS.QUERY.DETAIL_PAGE_URL,
-      "href"
-    );
-    const seeds = await getPropertyValue(result, agent.SELECTORS.QUERY.SEEDS);
-    const leeches = await getPropertyValue(
-      result,
-      agent.SELECTORS.QUERY.LEECHES
-    );
-    const size = await getPropertyValue(result, agent.SELECTORS.QUERY.SIZE);
-    const date = await getPropertyValue(result, agent.SELECTORS.QUERY.DATE);
-    // const poster = await PuppeteerUtility.getPropertyValue(
-    //   result,
-    //   constants.RESULTS_QUERY_SELECTORS.QUERY.RESULT_POSTER_URL,
-    //   "src"
-    // );
-    // const year = await PuppeteerUtility.getPropertyValue(
-    //   result,
-    //   constants.RESULTS_QUERY_SELECTORS.QUERY.RESULT_YEAR
-    // );
+//   const browser = await puppeteer.launch();
+//   const page = await browser.newPage();
+//   await page.goto(magnet.url);
 
-    console.log({ name, url, seeds, leeches, size, date });
+//   const magnetLink = await (
+//     await (await page.$(agent.SELECTORS.DETAIL.MAGNET_LINK)).getProperty("href")
+//   ).jsonValue();
+//   console.log(magnetLink);
 
-    queryResults.push({ name, url, seeds, leeches, size, date });
-  }
+//   return magnetLink;
 
-  await browser.close();
+//   // const magnetLink = await page.$$(agent.SELECTORS.DETAIL.RESULTS);
+// };
 
-  getMagnetLink(1);
-}
+// // const sortBySeeders = () => {
+// //   const data = queryResults;
+// //   results.filter();
+// // };
 
-const getMagnetLink = async index => {
-  const magnet = queryResults[index];
-
-  console.log("getting magnet link for " + magnet.name);
-
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-  await page.goto(magnet.url);
-
-  const magnetLink = await (
-    await (await page.$(agent.SELECTORS.DETAIL.MAGNET_LINK)).getProperty("href")
-  ).jsonValue();
-  console.log(magnetLink);
-
-  return magnetLink;
-
-  // const magnetLink = await page.$$(agent.SELECTORS.DETAIL.RESULTS);
-};
-
-makeTheQuery();
+// makeTheQuery();
